@@ -1,0 +1,6 @@
+anthropic>=2.9
+pymupdf
+pandas
+scipy
+matplotlib
+openpyxl
