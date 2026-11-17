@@ -601,7 +601,22 @@ class Agent:
 
 
 # ---------------------------------------------------------------- CLI
+def _load_saved_key():
+    """Windows：当前进程里没有 Key 时，读取用 setx 保存的用户环境变量（终端未重启时常见）。"""
+    if os.name != "nt" or os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN"):
+        return
+    try:
+        import winreg
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, "Environment") as k:
+            value, _ = winreg.QueryValueEx(k, "ANTHROPIC_API_KEY")
+        if value:
+            os.environ["ANTHROPIC_API_KEY"] = value
+    except OSError:
+        pass
+
+
 def _check_key():
+    _load_saved_key()
     if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
         raise SystemExit("未设置 ANTHROPIC_API_KEY。请在 platform.claude.com 创建 API Key，并设置为环境变量（见 README）。")
 
